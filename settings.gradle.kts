@@ -36,7 +36,7 @@ sc {
     mc("1.21.5", "fabric", "neoforge")
     mc("1.21.6", "fabric", "neoforge")
     mc("1.21.9", "fabric", "neoforge")
-    mc("1.21.11", "fabric"/*, "neoforge"*/) // temp disabled until YACL is updated
+    mc("1.21.11", "fabric"/*, "neoforge"*/) // TODO: enable once YACL is updated
 
     vcsVersion = "1.21.4-fabric"
   }

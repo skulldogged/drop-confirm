@@ -43,7 +43,7 @@ modstitch {
   metadata {
     modId = "drop_confirm"
     modName = "DropConfirm"
-    modVersion = "6.0.1"
+    modVersion = "6.1.0"
     modGroup = "xyz.pupbrained.drop_confirm"
     modAuthor = "pupbrained"
     modDescription = "Think twice before you drop. Adds a confirmation prompt when dropping items."
@@ -226,8 +226,9 @@ publishMods {
 
   changelog = """
     This update adds support for Minecraft 1.21.11 and fixes some issues:
-      * Fixed an issue where DropConfirm used packet modifications to cancel drops, sometimes causing false bans on servers.
+      * Fixed an issue where DropConfirm used packet modifications to cancel drops, which could trip some anticheats.
       * Fixed a crash on 1.21.1 + NeoForge related to an incorrect annotation.
+      * Fixed an issue with metadata for 1.21.10 on fabric.
 
     ## Dependencies
 

@@ -228,7 +228,7 @@ publishMods {
     This update adds support for Minecraft 1.21.11 and fixes some issues:
       * Fixed an issue where DropConfirm used packet modifications to cancel drops, which could trip some anticheats.
       * Fixed a crash on 1.21.1 + NeoForge related to an incorrect annotation.
-      * Fixed an issue with metadata for 1.21.10 on fabric.
+      * Fixed an issue with metadata for 1.21.10 on Fabric.
 
     ## Dependencies
 

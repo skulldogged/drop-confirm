@@ -72,18 +72,24 @@ public class ItemDropMixin {
 
         case ACTIONBAR:
           // Use existing hotbar implementation
+          //? if >=26.1 {
+          /*player.sendOverlayMessage(ComponentUtils.translatable("drop_confirm.confirmation", keyMessage));
+          *///?} else {
           player.displayClientMessage(
             ComponentUtils.translatable("drop_confirm.confirmation", keyMessage),
             true
-          );
+          );//?}
           break;
 
         case CHAT:
           // Send chat message
+          //? if >=26.1 {
+          /*player.sendSystemMessage(ComponentUtils.translatable("drop_confirm.confirmation", keyMessage));
+          *///?} else {
           player.displayClientMessage(
             ComponentUtils.translatable("drop_confirm.confirmation", keyMessage),
             false
-          );
+          );//?}
           break;
       }
 

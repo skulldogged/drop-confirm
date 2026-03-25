@@ -1,7 +1,7 @@
 package xyz.pupbrained.drop_confirm.platform
 
 //? if >=1.20.1 {
-import net.minecraft.client.gui.GuiGraphics as PoseStack
+import net.minecraft.client.gui./*$ gui_graphics_type {*/GuiGraphics/*$}*/ as PoseStack
 import xyz.pupbrained.drop_confirm.platform.impl.GuiGraphicsRenderImpl
 //?} elif >=1.16.5 {
 /*import com.mojang.blaze3d.vertex.PoseStack

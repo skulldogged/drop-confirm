@@ -1,6 +1,7 @@
 import io.github.klahap.dotenv.DotEnvBuilder
 import net.fabricmc.loom.api.fabricapi.FabricApiExtension
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_16
@@ -22,6 +23,7 @@ fun getDepOrNull(name: String): String? =
 val minecraft = getDep("minecraft")
 
 val java = when {
+  sc.current.parsed >= "26.1" -> 25 to JVM_25
   sc.current.parsed >= "1.20.5" -> 21 to JVM_21
   sc.current.parsed >= "1.18" -> 17 to JVM_17
   sc.current.parsed >= "1.17" -> 16 to JVM_16
@@ -43,7 +45,7 @@ modstitch {
   metadata {
     modId = "drop_confirm"
     modName = "DropConfirm"
-    modVersion = "6.1.0"
+    modVersion = "6.1.1"
     modGroup = "xyz.pupbrained.drop_confirm"
     modAuthor = "pupbrained"
     modDescription = "Think twice before you drop. Adds a confirmation prompt when dropping items."
@@ -56,7 +58,7 @@ modstitch {
 
     replacementProperties.put(
       "loader_version", when (loader) {
-        "fabric" -> "0.18.2"
+        "fabric" -> "0.18.4"
         else -> getDep(loader)
       }
     )
@@ -70,7 +72,7 @@ modstitch {
     replacementProperties.put("pack_format", getDep("pack_format"))
   }
 
-  loom { fabricLoaderVersion = "0.18.2" }
+  loom { fabricLoaderVersion = "0.18.4" }
 
   moddevgradle {
     defaultRuns()
@@ -89,6 +91,12 @@ modstitch {
   kotlin {
     jvmToolchain(java.first)
     compilerOptions.jvmTarget.set(java.second)
+  }
+}
+
+if (loader == "fabric") {
+  extensions.configure<net.fabricmc.loom.api.LoomGradleExtensionAPI>("loom") {
+    enableTransitiveAccessWideners.set(false)
   }
 }
 
@@ -131,6 +139,7 @@ sc {
     else -> "itemStack.rarity.color"
   }
   swaps["render_method"] = when {
+    current.parsed >= "26.1" -> "extractContents"
     current.parsed >= "1.21.11" -> "renderContents"
     current.parsed >= "1.20.4" -> "renderWidget"
     current.parsed >= "1.17.1" -> "render"
@@ -153,6 +162,22 @@ sc {
     current.parsed >= "1.21.11" -> "Identifier"
     else -> "ResourceLocation"
   }
+  swaps["gui_graphics_type"] = when {
+    current.parsed >= "26.1" -> "GuiGraphicsExtractor"
+    else -> "GuiGraphics"
+  }
+  swaps["draw_string_fn"] = when {
+    current.parsed >= "26.1" -> "text"
+    else -> "drawString"
+  }
+  swaps["draw_centered_string_fn"] = when {
+    current.parsed >= "26.1" -> "centeredText"
+    else -> "drawCenteredString"
+  }
+  swaps["screen_render_fn"] = when {
+    current.parsed >= "26.1" -> "extractRenderState"
+    else -> "render"
+  }
 }
 
 dependencies {
@@ -168,7 +193,7 @@ dependencies {
       listOf(
         "fabric-api-base",
         "fabric-lifecycle-events-v1",
-        "fabric-key-binding-api-v1",
+        if (sc.current.parsed >= "26.1") "fabric-key-mapping-api-v1" else "fabric-key-binding-api-v1",
         "fabric-resource-loader-v0"
       ).forEach {
         modstitchModImplementation(
@@ -225,10 +250,10 @@ publishMods {
   displayName = releaseDisplayName
 
   changelog = """
-    This update adds support for Minecraft 1.21.11 and fixes some issues:
-      * Fixed an issue where DropConfirm used packet modifications to cancel drops, which could trip some anticheats.
-      * Fixed a crash on 1.21.1 + NeoForge related to an incorrect annotation.
-      * Fixed an issue with metadata for 1.21.10 on Fabric.
+    This update fixes a startup issue caused by a dependency mismatch on Fabric.
+
+      * Game startup should work normally again.
+      * Legacy Fabric versions are supported again.
 
     ## Dependencies
 

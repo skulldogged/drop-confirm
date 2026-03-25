@@ -1,7 +1,7 @@
 package xyz.pupbrained.drop_confirm.screens
 
 //? if >=1.20.1 {
-import net.minecraft.client.gui.GuiGraphics as PoseStack
+import net.minecraft.client.gui./*$ gui_graphics_type {*/GuiGraphics/*$}*/ as PoseStack
 //?} elif >=1.16.5 {
 /*import com.mojang.blaze3d.vertex.PoseStack
 *///?}
@@ -123,7 +123,7 @@ class PopupScreen(val itemStack: ItemStack) : Screen(ComponentUtils.translatable
     }
   }
 
-  override fun render(/*? if >=1.16.5 {*/poseStack: PoseStack,/*?}*/ mouseX: Int, mouseY: Int, partialTick: Float) {
+  override fun /*$ screen_render_fn {*/render/*$}*/(/*? if >=1.16.5 {*/poseStack: PoseStack,/*?}*/ mouseX: Int, mouseY: Int, partialTick: Float) {
     getRenderImpl(/*? if >=1.16.5 {*/poseStack/*?}*/).apply {
       //? if <=1.20.1 {
       /*fillGradient(0, 0, width, height, DIMMING(), DIMMING())
@@ -215,7 +215,7 @@ class PopupScreen(val itemStack: ItemStack) : Screen(ComponentUtils.translatable
       }
     }
 
-    renderables.forEach { it.render(/*? if >=1.16.5 {*/poseStack,/*?}*/ mouseX, mouseY, partialTick) }
+    renderables.forEach { it./*$ screen_render_fn {*/render/*$}*/(/*? if >=1.16.5 {*/poseStack,/*?}*/ mouseX, mouseY, partialTick) }
   }
 
   //? if >=1.21.9 {

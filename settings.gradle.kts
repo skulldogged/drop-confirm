@@ -9,7 +9,7 @@ pluginManagement {
   }
 }
 
-plugins { id("dev.kikugie.stonecutter") version "0.8-beta.2" }
+plugins { id("dev.kikugie.stonecutter") version "0.9.1-beta.2" }
 
 sc {
   kotlinController = true
@@ -22,11 +22,9 @@ sc {
     mc("1.15.2", "fabric")
     mc("1.16.5", "fabric")
     mc("1.17.1", "fabric")
-
-    mc("1.18.2", "fabric", "forge")
-    mc("1.19.4", "fabric", "forge")
-    mc("1.20.1", "fabric", "forge")
-
+    mc("1.18.2", "fabric")
+    mc("1.19.4", "fabric")
+    mc("1.20.1", "fabric")
     mc("1.20.4", "fabric")
 
     mc("1.20.6", "fabric", "neoforge")
@@ -37,6 +35,8 @@ sc {
     mc("1.21.6", "fabric", "neoforge")
     mc("1.21.9", "fabric", "neoforge")
     mc("1.21.11", "fabric", "neoforge")
+
+    mc("26.1", "fabric", "neoforge")
 
     vcsVersion = "1.21.4-fabric"
   }

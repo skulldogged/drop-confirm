@@ -27,6 +27,6 @@
     "java": ">=${java}",
     "fabric-api": ">=${fabric_api}",
     "fabric-language-kotlin": "*",
-    "${config_lib}": "${config_lib_version}"
+    "${config_lib}": ">=${config_lib_version}"
   }
 }

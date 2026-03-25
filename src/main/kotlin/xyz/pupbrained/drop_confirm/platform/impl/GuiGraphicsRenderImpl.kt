@@ -2,19 +2,19 @@
 package xyz.pupbrained.drop_confirm.platform.impl
 
 import net.minecraft.client.gui.Font
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui./*$ gui_graphics_type {*/GuiGraphics/*$}*/
 import net.minecraft.util.FormattedCharSequence
 import xyz.pupbrained.drop_confirm.platform.RenderInterface
 
-class GuiGraphicsRenderImpl(private val graphics: GuiGraphics) : RenderInterface {
+class GuiGraphicsRenderImpl(private val graphics: /*$ gui_graphics_type {*/GuiGraphics/*$}*/) : RenderInterface {
   override fun drawString(font: Font, text: String, x: Int, y: Int, color: Int, shadow: Boolean): RenderInterface {
-    graphics.drawString(font, text, x, y, color, shadow)
+    graphics./*$ draw_string_fn {*/drawString/*$}*/(font, text, x, y, color, shadow)
 
     return this
   }
 
   override fun drawCenteredString(font: Font, text: String, x: Int, y: Int, color: Int): RenderInterface {
-    graphics.drawCenteredString(font, text, x, y, color)
+    graphics./*$ draw_centered_string_fn {*/drawCenteredString/*$}*/(font, text, x, y, color)
 
     return this
   }
@@ -26,7 +26,7 @@ class GuiGraphicsRenderImpl(private val graphics: GuiGraphics) : RenderInterface
     y: Int,
     color: Int
   ): RenderInterface {
-    graphics.drawCenteredString(font, text, x, y, color)
+    graphics./*$ draw_centered_string_fn {*/drawCenteredString/*$}*/(font, text, x, y, color)
 
     return this
   }

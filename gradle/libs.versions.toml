@@ -1,7 +1,7 @@
 [versions]
-kotlin = "2.1.21"
-mod-publish-plugin = "0.8.4"
-modstitch-base = "0.7+"
+kotlin = "2.3.20"
+mod-publish-plugin = "1.1.0"
+modstitch-base = "0.8+"
 dotenv = "1.1.3"
 mixin = "0.8.5"
 json = "0.3.1"

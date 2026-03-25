@@ -1,0 +1,33 @@
+src/main/kotlin/xyz/pupbrained/drop_confirm/screens/PopupScreen.kt
+  afaf5e25033c3360 4,126,218
+src/main/templates/pack.mcmeta
+  afaf5e25033c3360 4-6
+src/main/kotlin/xyz/pupbrained/drop_confirm/loaders/fabric/FabricEntrypoint.kt
+  afaf5e25033c3360 6,10,18,22
+src/main/kotlin/xyz/pupbrained/drop_confirm/platform/RenderInterface.kt
+  afaf5e25033c3360 4
+build.gradle.kts
+  afaf5e25033c3360 142,165-180
+src/main/java/xyz/pupbrained/drop_confirm/mixin/ItemDropMixin.java
+  afaf5e25033c3360 75,86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "0a3f3e2fba7a9cca3ec7ff58749de4d6ae0d73cd",
+  "prompts": {
+    "afaf5e25033c3360": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d5480542-2849-4d43-9eb3-f3da80eb55a7",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Mars <mars@pupbrained.dev>",
+      "messages": [],
+      "total_additions": 51,
+      "total_deletions": 16,
+      "accepted_lines": 30,
+      "overriden_lines": 11
+    }
+  }
+}

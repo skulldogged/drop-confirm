@@ -250,10 +250,7 @@ publishMods {
   displayName = releaseDisplayName
 
   changelog = """
-    This update fixes a startup issue caused by a dependency mismatch on Fabric.
-
-      * Game startup should work normally again.
-      * Legacy Fabric versions are supported again.
+    This update adds Minecraft 26.1 support & fixes a startup issue caused by a dependency mismatch on Fabric.
 
     ## Dependencies
 

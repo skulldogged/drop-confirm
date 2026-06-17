@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.Items
 import xyz.pupbrained.drop_confirm.config.ConfirmationMode
 import xyz.pupbrained.drop_confirm.config.DropConfirmConfig.HANDLER
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils
 
 object DropConfirmConfigScreen {
   @JvmStatic
@@ -72,7 +73,7 @@ object DropConfirmConfigScreen {
         get = { config.treatAsWhitelist },
         set = { value ->
           config.treatAsWhitelist = value
-          Minecraft.getInstance().apply { execute { setScreen(invoke(parent)) } }
+          Minecraft.getInstance().apply { execute { ClientGuiUtils.setScreen(this, invoke(parent)) } }
         },
         controller = { BooleanController(it, true) }
       )
@@ -112,6 +113,7 @@ import xyz.pupbrained.drop_confirm.config.DropConfirmConfig
 import xyz.pupbrained.drop_confirm.config.widgets.ButtonControl
 import xyz.pupbrained.drop_confirm.config.widgets.EnumControl
 import xyz.pupbrained.drop_confirm.config.widgets.SliderControl
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils
 
 //? if >=1.18.2 {
 import net.minecraft.client.gui.narration.NarratableEntry
@@ -252,7 +254,7 @@ class DropConfirmConfigScreen(parentScreen: Screen) : ExtendedScreen("DropConfir
       CONTROL_HEIGHT,
       TRANSLATOR.translate(listTypeKey)
     ) {
-      minecraft?.setScreen(DropConfirmListEditorScreen(this))
+      ClientGuiUtils.setScreen(minecraft, DropConfirmListEditorScreen(this))
     }.apply {
       setOnHover { drawMultiLineString(StringUtils.splitTextByNewLine(TRANSLATOR.translate("$listTypeKey.description"))) }
     }
@@ -305,7 +307,7 @@ class DropConfirmConfigScreen(parentScreen: Screen) : ExtendedScreen("DropConfir
         TRANSLATOR.translate("option.drop_confirm.cancel")
       ) {
         resetConfigToOriginalValues()
-        minecraft?.setScreen(previousScreen)
+        ClientGuiUtils.setScreen(minecraft, previousScreen)
       }
     )
 
@@ -319,7 +321,7 @@ class DropConfirmConfigScreen(parentScreen: Screen) : ExtendedScreen("DropConfir
         TRANSLATOR.translate("option.drop_confirm.save_and_close")
       ) {
         DropConfirmConfig.save()
-        minecraft?.setScreen(previousScreen)
+        ClientGuiUtils.setScreen(minecraft, previousScreen)
       }
     )
   }

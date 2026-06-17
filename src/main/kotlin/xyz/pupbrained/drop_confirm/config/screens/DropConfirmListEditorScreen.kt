@@ -37,6 +37,7 @@ import org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER
 import xyz.pupbrained.drop_confirm.config.DropConfirmConfig
 import xyz.pupbrained.drop_confirm.util.Color
 import xyz.pupbrained.drop_confirm.platform.RenderInterface.Companion.getRenderImpl
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils
 import xyz.pupbrained.drop_confirm.util.ComponentUtils
 
 class DropConfirmListEditorScreen(private val parentScreen: Screen) :
@@ -177,7 +178,7 @@ class DropConfirmListEditorScreen(private val parentScreen: Screen) :
   private fun saveAndReturn() {
     DropConfirmConfig.blacklistedItems = itemsList
     DropConfirmConfig.save()
-    minecraft?.setScreen(parentScreen)
+    ClientGuiUtils.setScreen(minecraft, parentScreen)
   }
 
   private fun addItemFromTextField() {

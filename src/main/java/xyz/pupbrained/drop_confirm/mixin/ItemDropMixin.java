@@ -21,6 +21,7 @@ import xyz.pupbrained.drop_confirm.DropConfirm;
 import xyz.pupbrained.drop_confirm.config.ConfirmationMode;
 import xyz.pupbrained.drop_confirm.config.DropConfirmConfig;
 import xyz.pupbrained.drop_confirm.screens.PopupScreen;
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils;
 import xyz.pupbrained.drop_confirm.util.ComponentUtils;
 
 import java.util.concurrent.Executors;
@@ -67,7 +68,7 @@ public class ItemDropMixin {
       switch (mode) {
         case POPUP:
           // Use PopupScreen for POPUP mode
-          minecraft.setScreen(new PopupScreen(itemStack));
+          ClientGuiUtils.setScreen(minecraft, new PopupScreen(itemStack));
           break;
 
         case ACTIONBAR:
@@ -121,7 +122,7 @@ public class ItemDropMixin {
         // @formatter:on
       ;
 
-      minecraft.gui.setOverlayMessage(ComponentUtils.empty(), false);
+      ClientGuiUtils.setOverlayMessage(minecraft, ComponentUtils.empty(), false);
 
       if (DropConfirmConfig.shouldPlaySounds())
         player.playSound(SoundEvents./*$ drop_sound {*/BUNDLE_DROP_CONTENTS/*$}*/, 1.0F, 1.0F);

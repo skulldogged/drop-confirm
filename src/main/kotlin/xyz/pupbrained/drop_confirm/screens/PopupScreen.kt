@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.item.ItemStack
 import xyz.pupbrained.drop_confirm.DropConfirm
 import xyz.pupbrained.drop_confirm.platform.RenderInterface.Companion.getRenderImpl
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils
 import xyz.pupbrained.drop_confirm.util.Color.*
 import xyz.pupbrained.drop_confirm.util.ComponentUtils
 
@@ -94,7 +95,7 @@ class PopupScreen(val itemStack: ItemStack) : Screen(ComponentUtils.translatable
           60, 20,
           ComponentUtils.translatable("gui.yes")/*? if <=1.15.2 {*//*.string*//*?}*/,
           {
-            minecraft?.setScreen(null)
+            ClientGuiUtils.setScreen(minecraft, null)
 
             val player = minecraft?.player ?: return@StyledButton
 
@@ -230,7 +231,7 @@ class PopupScreen(val itemStack: ItemStack) : Screen(ComponentUtils.translatable
 
       // Case 3: If mouse is outside the popup area and should close on ESC
       (event.x() < x1 || event.x() >= x2 || event.y() < y1 || event.y() >= y2) && shouldCloseOnEsc() -> {
-        minecraft?.setScreen(null)
+        ClientGuiUtils.setScreen(minecraft, null)
         true
       }
 
@@ -249,7 +250,7 @@ class PopupScreen(val itemStack: ItemStack) : Screen(ComponentUtils.translatable
 
       // Case 3: If mouse is outside the popup area and should close on ESC
       (mouseX < x1 || mouseX >= x2 || mouseY < y1 || mouseY >= y2) && shouldCloseOnEsc() -> {
-        minecraft?.setScreen(null)
+        ClientGuiUtils.setScreen(minecraft, null)
         true
       }
 

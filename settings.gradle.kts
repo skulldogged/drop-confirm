@@ -37,6 +37,7 @@ sc {
     mc("1.21.11", "fabric", "neoforge")
 
     mc("26.1", "fabric", "neoforge")
+    mc("26.2", "fabric", "neoforge")
 
     vcsVersion = "1.21.4-fabric"
   }

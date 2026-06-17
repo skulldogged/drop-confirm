@@ -57,6 +57,11 @@ modstitch {
       replacementProperties.put("fabric_api", getDep("fabric-api"))
 
     replacementProperties.put(
+      "fabric_key_api",
+      if (sc.current.parsed >= "26.1") "fabric-key-mapping-api-v1" else "fabric-key-binding-api-v1"
+    )
+
+    replacementProperties.put(
       "loader_version", when (loader) {
         "fabric" -> "0.18.4"
         else -> getDep(loader)
@@ -202,6 +207,8 @@ dependencies {
         )
       }
 
+      getDepOrNull("mixinExtras")?.let { modstitchModImplementation(it) }
+
       modstitchModImplementation("maven.modrinth:modmenu:${getDep("modmenu")}")
     }
 
@@ -250,7 +257,7 @@ publishMods {
   displayName = releaseDisplayName
 
   changelog = """
-    This update adds Minecraft 26.1 support & fixes a startup issue caused by a dependency mismatch on Fabric.
+    This update adds Minecraft 26.2 support.
 
     ## Dependencies
 

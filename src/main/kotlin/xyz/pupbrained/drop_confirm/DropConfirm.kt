@@ -14,6 +14,7 @@ import net.minecraft.resources./*$ identifier_type {*/ResourceLocation/*$}*/
 import net.minecraft.sounds.SoundEvents
 import org.lwjgl.glfw.GLFW
 import xyz.pupbrained.drop_confirm.config.DropConfirmConfig
+import xyz.pupbrained.drop_confirm.util.ClientGuiUtils
 import xyz.pupbrained.drop_confirm.util.ComponentUtils
 
 object DropConfirm {
@@ -54,7 +55,8 @@ object DropConfirm {
           if (shouldPlaySounds)
             it.playSound(SoundEvents.ITEM_PICKUP, 1.0f, if (enabled) 1.0f else 0.5f)
 
-          mc.gui.setOverlayMessage(
+          ClientGuiUtils.setOverlayMessage(
+            mc,
             ComponentUtils.literal("DropConfirm: ").append(
               ComponentUtils
                 .translatable(if (enabled) "drop_confirm.toggle.on" else "drop_confirm.toggle.off")

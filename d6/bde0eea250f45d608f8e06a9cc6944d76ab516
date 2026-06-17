@@ -1,0 +1,42 @@
+src/main/kotlin/xyz/pupbrained/drop_confirm/config/screens/DropConfirmListEditorScreen.kt
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 40,181
+src/main/java/xyz/pupbrained/drop_confirm/mixin/ItemDropMixin.java
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 22-25,69-72,125
+src/main/kotlin/xyz/pupbrained/drop_confirm/config/screens/DropConfirmConfigScreen.kt
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 16,76,116,257,310,324
+src/main/templates/fabric.mod.json
+  s_e6a9773350bc33::t_ae6cf662b4d800 28-31
+versions/26.2-fabric/gradle.properties
+  s_e6a9773350bc33::t_772a4dd1553414 11
+  s_e6a9773350bc33::t_6c38d20051902c 1-10,12-13
+src/main/kotlin/xyz/pupbrained/drop_confirm/screens/PopupScreen.kt
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 22-26,98,234,253
+versions/26.2-neoforge/gradle.properties
+  s_e6a9773350bc33::t_6c38d20051902c 1-12
+src/main/kotlin/xyz/pupbrained/drop_confirm/util/ClientGuiUtils.kt
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 1-27
+settings.gradle.kts
+  s_e6a9773350bc33::t_f7f3d033d1c3e1 40
+build.gradle.kts
+  s_e6a9773350bc33::t_ae6cf662b4d800 59-62
+  s_e6a9773350bc33::t_772a4dd1553414 210-211
+  s_e6a9773350bc33::t_6c38d20051902c 260
+src/main/kotlin/xyz/pupbrained/drop_confirm/DropConfirm.kt
+  s_e6a9773350bc33::t_a2cd6d8c165c4a 15-18,58-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "d6bde0eea250f45d608f8e06a9cc6944d76ab516",
+  "prompts": {},
+  "sessions": {
+    "s_e6a9773350bc33": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ece64-5779-7a12-aed4-b05f3ae849e4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Mars <mars@pupbrained.dev>"
+    }
+  }
+}

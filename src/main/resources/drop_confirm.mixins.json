@@ -1,5 +1,5 @@
 {
-  "package": "xyz.pupbrained.drop_confirm.mixin",
+  "package": "dev.skulldogged.drop_confirm.mixin",
   "required": true,
   "refmap": "drop_confirm.refmap.json",
   "minVersion": "0.7",

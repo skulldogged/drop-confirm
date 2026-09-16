@@ -9,7 +9,7 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 description = "${mod_description}"
 authors = "${mod_author}"
-logoFile = "drop_confirm.png"
+${neoforge_icon_property} = "drop_confirm.png"
 
 [[dependencies.${mod_id}]]
 modId = "neoforge"
@@ -21,7 +21,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[${minecraft_version},)"
+versionRange = "${minecraft_range}"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]

@@ -46,12 +46,14 @@ modstitch {
     modId = "drop_confirm"
     modName = "DropConfirm"
     modVersion = "6.1.1"
-    modGroup = "xyz.pupbrained.drop_confirm"
-    modAuthor = "pupbrained"
+    modGroup = "dev.skulldogged.drop_confirm"
+    modAuthor = "skulldogged"
     modDescription = "Think twice before you drop. Adds a confirmation prompt when dropping items."
     modLicense = "MIT"
 
     replacementProperties.put("java", "${java.first}")
+    replacementProperties.put("minecraft_range", getDepOrNull("minecraftRange")
+      ?: if (loader == "fabric") ">=$minecraft" else "[$minecraft,)")
 
     if (loader == "fabric")
       replacementProperties.put("fabric_api", getDep("fabric-api"))
@@ -63,21 +65,29 @@ modstitch {
 
     replacementProperties.put(
       "loader_version", when (loader) {
-        "fabric" -> "0.18.4"
+        "fabric" -> getDepOrNull("fabric-loader") ?: "0.18.4"
         else -> getDep(loader)
       }
+    )
+
+    replacementProperties.put("fabric_resource_api",
+      if (sc.current.parsed >= "26.3") "fabric-resource-loader-v1" else "fabric-resource-loader-v0"
+    )
+    replacementProperties.put("fabric_kotlin_range",
+      getDepOrNull("fabric-language-kotlin")?.let { ">=$it" } ?: "*"
     )
 
     replacementProperties.put("config_lib", getDep("configLibName"))
 
     replacementProperties.put("config_lib_version", getDep("configLibVersion"))
 
-    replacementProperties.put("mod_sources", "https://github.com/pupbrained/drop-confirm")
-    replacementProperties.put("mod_issue_tracker", "https://github.com/pupbrained/drop-confirm/issues")
+    replacementProperties.put("mod_sources", "https://github.com/skulldogged/drop-confirm")
+    replacementProperties.put("mod_issue_tracker", "https://github.com/skulldogged/drop-confirm/issues")
     replacementProperties.put("pack_format", getDep("pack_format"))
+    replacementProperties.put("neoforge_icon_property", if (sc.current.parsed >= "26.3") "iconFile" else "logoFile")
   }
 
-  loom { fabricLoaderVersion = "0.18.4" }
+  loom { fabricLoaderVersion = getDepOrNull("fabric-loader") ?: "0.18.4" }
 
   moddevgradle {
     defaultRuns()
@@ -199,7 +209,7 @@ dependencies {
         "fabric-api-base",
         "fabric-lifecycle-events-v1",
         if (sc.current.parsed >= "26.1") "fabric-key-mapping-api-v1" else "fabric-key-binding-api-v1",
-        "fabric-resource-loader-v0"
+        if (sc.current.parsed >= "26.3") "fabric-resource-loader-v1" else "fabric-resource-loader-v0"
       ).forEach {
         modstitchModImplementation(
           (project.extensions.findByName("fabricApi") as FabricApiExtension)
@@ -208,6 +218,9 @@ dependencies {
       }
 
       getDepOrNull("mixinExtras")?.let { modstitchModImplementation(it) }
+      getDepOrNull("fabric-language-kotlin")?.let {
+        modstitchModImplementation("net.fabricmc:fabric-language-kotlin:$it")
+      }
 
       modstitchModImplementation("maven.modrinth:modmenu:${getDep("modmenu")}")
     }
@@ -277,7 +290,7 @@ publishMods {
 
   github("github") {
     accessToken.set(envVars["GITHUB_TOKEN"])
-    repository.set("pupbrained/drop-confirm")
+    repository.set("skulldogged/drop-confirm")
     commitish.set("master")
     tagName.set("v${modstitch.metadata.modVersion.get()}-$minecraft-$loader")
   }

@@ -1,0 +1,360 @@
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -12,7 +12,6 @@
+     signing
+     id("dev.isxander.secrets")
+ 
+-    id("org.ajoberstar.grgit")
+ }
+ 
+ // version stuff
+@@ -35,10 +34,6 @@
+     else -> error("Unknown loader")
+ }
+ 
+-val snapshotVer = "${grgit.branch.current().name.replace('/', '.')}-SNAPSHOT"
+-if (System.getenv().containsKey("GITHUB_ACTIONS")) {
+-    version = "$version+$snapshotVer"
+-}
+ 
+ val testmod by sourceSets.registering {
+     compileClasspath += sourceSets.main.get().compileClasspath
+@@ -47,6 +42,7 @@
+ 
+ modstitch {
+     minecraftVersion = mcVersion
++    javaVersion = 25
+ 
+     parchment {
+         prop("parchment.version") { mappingsVersion = it }
+@@ -60,11 +56,7 @@
+ 
+         prop("modId") { modId = it }
+         prop("modName") { modName = it }
+-        modVersion = if (System.getenv().containsKey("GITHUB_ACTIONS")) {
+-            "$versionWithoutMC+$snapshotVer"
+-        } else {
+-            "$versionWithoutMC+${stonecutter.current.project}"
+-        }
++        modVersion = "$versionWithoutMC+${stonecutter.current.project}.dropconfirm.1"
+         modGroup = "dev.isxander"
+         prop("modDescription") { modDescription = it }
+         modLicense = "LGPL-3.0-or-later"
+--- a/stonecutter.gradle.kts
++++ b/stonecutter.gradle.kts
+@@ -5,7 +5,8 @@
+ 
+     val modstitchVersion = "0.8.4"
+     id("dev.isxander.modstitch.base") version modstitchVersion apply false
+-    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT" apply false
++    id("net.fabricmc.fabric-loom") version "1.17.21" apply false
++    id("net.neoforged.moddev") version "2.0.147" apply false
+ 
+     id("me.modmuss50.mod-publish-plugin") version "0.8.4" apply false
+     id("org.ajoberstar.grgit") version "5.0.+" apply false
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -25,7 +25,7 @@
+ 
+         mc("26.1", loaders = listOf("fabric", "neoforge"))
+         mc("26.2", loaders = listOf("fabric", "neoforge"))
+-        mc("26.3", loaders = listOf("fabric"))
++        mc("26.3", loaders = listOf("fabric", "neoforge"))
+     }
+ }
+ rootProject.name = "YetAnotherConfigLib"
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -1,6 +1,6 @@
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-9.4.0-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-9.6.0-bin.zip
+ networkTimeout=10000
+ validateDistributionUrl=true
+ zipStoreBase=GRADLE_USER_HOME
+--- a/versions/26.3-fabric/gradle.properties
++++ b/versions/26.3-fabric/gradle.properties
+@@ -1,10 +1,10 @@
+ modstitch.platform=fabric-loom
+ 
+-mcVersion=26.3-snapshot-4
++mcVersion=26.3
+ 
+-deps.fabricApi=0.155.2+26.3
++deps.fabricApi=0.160.6+26.3
+ 
+-meta.mcDep=~26.3-
++meta.mcDep=~26.3
+ 
+-pub.modrinthMC=26.3-snapshot-4
+-pub.curseMC=26.3-snapshot
++pub.modrinthMC=26.3
++pub.curseMC=26.3
+--- /dev/null
++++ b/versions/26.3-neoforge/gradle.properties
+@@ -0,0 +1,8 @@
++modstitch.platform=moddevgradle
++mcVersion=26.3
++deps.neoforge=26.3.0.1-beta
++deps.kotlinForForge=6.3.0+26.3.dropconfirm.1
++meta.mcDep=[26.3,26.4)
++meta.loaderDep=[26.3,26.4)
++pub.modrinthMC=26.3
++pub.curseMC=26.3
+--- a/src/main/java/dev/isxander/yacl3/gui/OptionListWidget.java
++++ b/src/main/java/dev/isxander/yacl3/gui/OptionListWidget.java
+@@ -21,6 +21,7 @@
+ import net.minecraft.client.input.CharacterEvent;
+ import net.minecraft.client.input.KeyEvent;
+ import net.minecraft.client.input.MouseButtonEvent;
++import net.minecraft.client.input.PreeditEvent;
+ import net.minecraft.network.chat.Component;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -211,6 +212,16 @@
+         return super.charTyped(characterEvent);
+     }
+ 
++    @Override
++    public boolean preeditUpdated(@Nullable PreeditEvent event) {
++        for (Entry child : children()) {
++            if (child.preeditUpdated(event))
++                return true;
++        }
++
++        return super.preeditUpdated(event);
++    }
++
+     private List<Entry> superModifiableChildren() {
+         // noinspection unchecked
+         return (List<Entry>) ((AbstractSelectionListAccessor) this).getChildren();
+@@ -298,6 +309,10 @@
+ 
+         protected void onBecameHidden() {
+             this.setHeight(0);
++        }
++
++        public boolean preeditUpdated(@Nullable PreeditEvent event) {
++            return false;
+         }
+     }
+ 
+@@ -374,6 +389,11 @@
+         }
+ 
+         @Override
++        public boolean preeditUpdated(@Nullable PreeditEvent event) {
++            return widget.preeditUpdated(event);
++        }
++
++        @Override
+         public boolean updateSearchQuery(String searchQuery) {
+             this.searchQueryMatches = searchQuery.isEmpty()
+                     || groupName.contains(searchQuery)
+--- a/src/main/java/dev/isxander/yacl3/gui/controllers/PopupControllerScreen.java
++++ b/src/main/java/dev/isxander/yacl3/gui/controllers/PopupControllerScreen.java
+@@ -8,6 +8,8 @@
+ import net.minecraft.client.input.CharacterEvent;
+ import net.minecraft.client.input.KeyEvent;
+ import net.minecraft.client.input.MouseButtonEvent;
++import net.minecraft.client.input.PreeditEvent;
++import org.jetbrains.annotations.Nullable;
+ import org.jspecify.annotations.NonNull;
+ 
+ public class PopupControllerScreen extends Screen {
+@@ -79,6 +81,11 @@
+     }
+ 
+     @Override
++    public boolean preeditUpdated(@Nullable PreeditEvent event) {
++        return controllerPopup.preeditUpdated(event);
++    }
++
++    @Override
+     public boolean keyPressed(@NonNull KeyEvent keyEvent) {
+         return controllerPopup.keyPressed(keyEvent);
+     }
+--- a/src/main/java/dev/isxander/yacl3/gui/controllers/ListEntryWidget.java
++++ b/src/main/java/dev/isxander/yacl3/gui/controllers/ListEntryWidget.java
+@@ -14,6 +14,7 @@
+ import net.minecraft.client.input.CharacterEvent;
+ import net.minecraft.client.input.KeyEvent;
+ import net.minecraft.client.input.MouseButtonEvent;
++import net.minecraft.client.input.PreeditEvent;
+ import net.minecraft.network.chat.Component;
+ import org.jetbrains.annotations.Nullable;
+ import org.jspecify.annotations.NonNull;
+@@ -159,4 +160,11 @@
+     public boolean charTyped(CharacterEvent characterEvent) {
+         return ContainerEventHandler.super.charTyped(characterEvent);
+     }
++
++    @Override
++    public boolean preeditUpdated(@Nullable PreeditEvent event) {
++        if (entryWidget.preeditUpdated(event))
++            return true;
++        return ContainerEventHandler.super.preeditUpdated(event);
++    }
+ }
+--- a/src/main/java/dev/isxander/yacl3/gui/utils/ItemRegistryHelper.java
++++ b/src/main/java/dev/isxander/yacl3/gui/utils/ItemRegistryHelper.java
+@@ -79,8 +79,13 @@
+                     return true;
+                 }
+                 Item item = getFromRegistry(BuiltInRegistries.ITEM, identifier);
+-                return item.getName(item.getDefaultInstance())
+-                        .getString().toLowerCase().contains(value.toLowerCase());
++                try {
++                    return item.getName(item.getDefaultInstance())
++                            .getString().toLowerCase().contains(value.toLowerCase());
++                } catch (NullPointerException unboundComponents) {
++                    // Item components are unavailable before a world has loaded.
++                    return false;
++                }
+             };
+ 
+         } else {
+--- a/src/main/java/dev/isxander/yacl3/gui/controllers/dropdown/DropdownWidget.java
++++ b/src/main/java/dev/isxander/yacl3/gui/controllers/dropdown/DropdownWidget.java
+@@ -132,6 +132,11 @@
+ 	}
+ 
+     @Override
++    public boolean preeditUpdated(@org.jetbrains.annotations.Nullable net.minecraft.client.input.PreeditEvent event) {
++        return dropdownElement.preeditUpdated(event);
++    }
++
++    @Override
+     public boolean charTyped(@NonNull CharacterEvent event) {
+         // Done to allow for typing whilst the color picker is visible
+         return dropdownElement.charTyped(event);
+--- a/src/main/java/dev/isxander/yacl3/gui/controllers/dropdown/AbstractDropdownControllerElement.java
++++ b/src/main/java/dev/isxander/yacl3/gui/controllers/dropdown/AbstractDropdownControllerElement.java
+@@ -204,6 +204,8 @@
+ 		dropdownVisible = true;
+ 		dropdownWidget = new DropdownWidget<>(dropdownController, screen, getDimension(), this);
+ 		screen.addPopupControllerWidget(dropdownWidget);
++        // Switching screens clears SDL text input focus.
++        client.onTextInputFocusChange(this, true);
+ 	}
+ 
+ 	public DropdownWidget<T> dropdownWidget() {
+--- a/src/main/java/dev/isxander/yacl3/gui/controllers/string/StringControllerElement.java
++++ b/src/main/java/dev/isxander/yacl3/gui/controllers/string/StringControllerElement.java
+@@ -10,10 +10,13 @@
+ import dev.isxander.yacl3.gui.utils.UndoRedoHelper;
+ import net.minecraft.ChatFormatting;
+ import net.minecraft.client.gui.GuiGraphicsExtractor;
++import net.minecraft.client.gui.components.IMEPreeditOverlay;
+ import net.minecraft.client.input.CharacterEvent;
+ import net.minecraft.client.input.KeyEvent;
+ import net.minecraft.client.input.MouseButtonEvent;
++import net.minecraft.client.input.PreeditEvent;
+ import net.minecraft.network.chat.Component;
++import org.jetbrains.annotations.Nullable;
+ import org.jspecify.annotations.NonNull;
+ 
+ import java.util.function.Consumer;
+@@ -36,6 +39,8 @@
+     protected float caretTicks;
+ 
+     private final Component emptyText;
++
++    private @Nullable IMEPreeditOverlay preeditOverlay;
+ 
+     public StringControllerElement(IStringController<?> control, YACLScreen screen, Dimension<Integer> dim, boolean instantApply) {
+         super(control, screen, dim);
+@@ -103,6 +108,14 @@
+         } else if (this.hovered) {
+             graphics.requestCursor(isAvailable() ? com.mojang.blaze3d.platform.cursor.CursorTypes.POINTING_HAND : com.mojang.blaze3d.platform.cursor.CursorTypes.NOT_ALLOWED);
+         }
++
++        if (preeditOverlay != null && inputFieldFocused) {
++            String text = getValueText().getString();
++            int preeditTextX = getDimension().xLimit() - textRenderer.width(getValueText()) + renderOffset - getXPadding();
++            int preeditCaretX = preeditTextX + textRenderer.width(text.substring(0, Math.min(caretPos, text.length())));
++            preeditOverlay.updateInputPosition(preeditCaretX, getTextY());
++            graphics.setPreeditOverlay(preeditOverlay);
++        }
+     }
+ 
+     private boolean isHoveredInputField(double mouseX, double mouseY) {
+@@ -112,7 +125,7 @@
+     @Override
+     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
+         if (isAvailable() && getDimension().isPointInside((int) event.x(), (int) event.y())) {
+-            inputFieldFocused = true;
++            setInputEditing(true);
+ 
+             if (!isHoveredInputField(event.x(), event.y())) {
+                 caretPos = getDefaultCaretPos();
+@@ -322,13 +335,28 @@
+         }
+     }
+ 
++    public boolean canConsumeInput() {
++        return inputFieldFocused && isAvailable();
++    }
++
+     @Override
+     public boolean charTyped(@NonNull CharacterEvent event) {
+-        if (!inputFieldFocused)
++        if (!canConsumeInput())
+             return false;
+ 
+         write(event.codepointAsString());
+         updateUndoHistory();
++        return true;
++    }
++
++    @Override
++    public boolean preeditUpdated(@Nullable PreeditEvent event) {
++        if (!canConsumeInput())
++            return false;
++
++        preeditOverlay = event != null
++                ? new IMEPreeditOverlay(event, textRenderer, textRenderer.lineHeight + 1)
++                : null;
+         return true;
+     }
+ 
+@@ -431,15 +459,25 @@
+     @Override
+     public void setFocused(boolean focused) {
+         super.setFocused(focused);
+-        inputFieldFocused = focused;
++        setInputEditing(focused);
+     }
+ 
+     @Override
+     public void unfocus() {
++        setInputEditing(false);
+         super.unfocus();
+-        inputFieldFocused = false;
+         renderOffset = 0;
+         if (!instantApply) updateControl();
++    }
++
++    private void setInputEditing(boolean editing) {
++        if (inputFieldFocused == editing)
++            return;
++
++        inputFieldFocused = editing;
++        client.onTextInputFocusChange(this, editing);
++        if (!editing)
++            preeditOverlay = null;
+     }
+ 
+     @Override
+--- a/src/main/templates/META-INF/neoforge.mods.toml
++++ b/src/main/templates/META-INF/neoforge.mods.toml
+@@ -11,7 +11,7 @@
+ description = '''
+ ${mod_description}
+ '''
+-logoFile = "yacl-128x.png"
++iconFile = "yacl-128x.png"
+ 
+ [["dependencies.${mod_id}"]]
+ modId = "neoforge"

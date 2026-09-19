@@ -21,7 +21,7 @@ import dev.skulldogged.drop_confirm.config.screens.DropConfirmConfigScreen
 @Mod("drop_confirm")
 @EventBusSubscriber(
   modid = "drop_confirm",
-  /*? if <=1.21.6 {*/bus = EventBusSubscriber.Bus.MOD,/*?}*/
+  /*? if <=1.21.5 {*/bus = EventBusSubscriber.Bus.MOD,/*?}*/
   value = [Dist.CLIENT]
 )
 class NeoforgeEntrypoint {

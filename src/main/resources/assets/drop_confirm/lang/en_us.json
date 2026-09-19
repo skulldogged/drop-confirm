@@ -1,6 +1,5 @@
 {
   "gui.drop_confirm": "DropConfirm",
-  "category.drop_confirm.general": "General",
   "key.category.drop_confirm.main": "DropConfirm",
   "config.drop_confirm.title": "DropConfirm Settings",
   "drop_confirm.confirmation": "Press %s again to drop this item.",

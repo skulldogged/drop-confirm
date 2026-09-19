@@ -275,18 +275,19 @@ publishMods {
   displayName = releaseDisplayName
 
   changelog = """
-    DropConfirm no longer depends on a config library. The settings screen is now built into the mod,
-    so YetAnotherConfigLib and UniLib are no longer required on any version.
-    The item list is now edited with a searchable picker instead of typing item IDs.
-    On NeoForge, Kotlin for Forge is no longer required either.
+    This update replaces the config library with a built-in settings screen and adds a searchable item picker.
+
+      * The settings screen is now built into the mod, so YetAnotherConfigLib and UniLib are no longer required.${
+    if (loader == "neoforge") "\n      * Kotlin for Forge is no longer required either. The Kotlin runtime is bundled with the mod." else ""
+  }
+      * The item list is edited with a searchable picker instead of typing item IDs.
+      * A new keybind (unbound by default) adds or removes the item you are holding as an exact item, so a specific named or enchanted item can be listed without affecting others of the same type.
+      * The confirmation popup now shows an item's custom name and colour.
 
     ## Dependencies
-      ${
-    if (loader == "fabric") """
+
     ### Required
-      * ${getDep("changelogKotlin")}
-    """ else "None."
-  }
+      ${if (loader == "fabric") "* ${getDep("changelogKotlin")}" else "* None."}
 
       ${
     if (loader == "fabric") """

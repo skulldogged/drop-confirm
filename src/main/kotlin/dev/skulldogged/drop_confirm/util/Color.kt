@@ -67,7 +67,16 @@ enum class Color(val rgb: Number) {
   BUTTON_CANCEL(0xFF8D3F3F),
 
   /** Hover color for cancellation buttons (lighter red). */
-  BUTTON_CANCEL_HOVER(0xFF9E4F4F);
+  BUTTON_CANCEL_HOVER(0xFF9E4F4F),
+
+  /** Backdrop of an item picker column. */
+  PICKER_COLUMN(0x60000000),
+
+  /** Background of an item picker row. */
+  PICKER_ROW(0x40000000),
+
+  /** Background of a hovered or focused item picker row. */
+  PICKER_ROW_HOVER(0x80555555);
 
   /**
    * Resolves this color to an `0xAARRGGBB` integer.

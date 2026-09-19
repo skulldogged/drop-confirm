@@ -36,7 +36,6 @@ val java = when {
 val loader = when {
   modstitch.isLoom -> "fabric"
   modstitch.isModDevGradleRegular -> "neoforge"
-  modstitch.isModDevGradleLegacy -> "forge"
   else -> throw IllegalStateException("Unsupported loader")
 }
 
@@ -91,10 +90,7 @@ modstitch {
   moddevgradle {
     defaultRuns()
 
-    listOf(
-      "forge" to ::forgeVersion,
-      "neoforge" to ::neoForgeVersion
-    ).forEach { (name, setter) -> (findProperty("deps.$name") as? String?)?.let { setter().set(it) } }
+    neoForgeVersion = getDep("neoforge")
   }
 
   mixin {
@@ -121,18 +117,13 @@ tasks {
   }
 
   named("compileKotlin") { dependsOn("stonecutterGenerate") }
-  processResources {
-    duplicatesStrategy = INCLUDE
-
-    if (loader != "forge")
-      exclude("META-INF/services/org.spongepowered.asm.mixin.connect.IMixinConnector")
-  }
+  processResources { duplicatesStrategy = INCLUDE }
 }
 
 sc {
   constants {
     val loader: String = current.project.substringAfter('-')
-    match(loader, "fabric", "forge", "neoforge")
+    match(loader, "fabric", "neoforge")
   }
 
   swaps["bus_subscriber_import"] = when {
@@ -148,7 +139,7 @@ sc {
     else -> "dist"
   }
   swaps["item_style"] = when {
-    (current.parsed >= "1.20.6" && loader == "neoforge") || loader == "forge" -> "itemStack.rarity.styleModifier"
+    current.parsed >= "1.20.6" && loader == "neoforge" -> "itemStack.rarity.styleModifier"
     current.parsed >= "1.20.6" && loader == "fabric" -> "itemStack.rarity.color()"
     else -> "itemStack.rarity.color"
   }
@@ -196,6 +187,10 @@ sc {
     current.parsed >= "1.17.1" -> "addRenderableWidget"
     else -> "addButton"
   }
+  swaps["schedule_task"] = when {
+    current.parsed >= "1.21.3" -> "schedule"
+    else -> "tell"
+  }
 }
 
 dependencies {
@@ -222,15 +217,7 @@ dependencies {
     }
 
     moddevgradle {
-      getDepOrNull("kotlinForForge")?.let {
-        if (loader == "neoforge") modstitchImplementation(it)
-        else modstitchModImplementation(it)
-      }
-
-      if (loader != "neoforge") {
-        modstitchImplementation(libs.mixin)
-        annotationProcessor(libs.mixin)
-      }
+      getDepOrNull("kotlinForForge")?.let { modstitchImplementation(it) }
     }
   }
 }
@@ -280,7 +267,7 @@ publishMods {
     "${modstitch.metadata.modName.get()} ${modstitch.metadata.modVersion.get()}$displayVersionSuffix"
 
   type = STABLE
-  file.set((if (loader == "forge" && sc.current.parsed >= "1.18") tasks.named("jar") else modstitch.finalJarTask).flatMap { (it as AbstractArchiveTask).archiveFile })
+  file.set(modstitch.finalJarTask.flatMap { (it as AbstractArchiveTask).archiveFile })
   displayName = releaseDisplayName
 
   changelog = """

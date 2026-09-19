@@ -2,10 +2,8 @@ package dev.skulldogged.drop_confirm.config
 
 //? if fabric {
 import net.fabricmc.loader.api.FabricLoader
-//?} elif neoforge {
+//?} else {
 /*import net.neoforged.fml.loading.FMLPaths
-*///?} else {
-/*import net.minecraftforge.fml.loading.FMLPaths
 *///?}
 
 import com.google.gson.Gson

@@ -13,8 +13,9 @@ import dev.skulldogged.drop_confirm.util.ClientGuiUtils
 /**
  * The main settings screen.
  *
- * Edits are applied to [DropConfirmConfig] immediately so the list editor sees
- * them; Cancel restores the values captured when the screen was opened.
+ * Scalar options are applied to [DropConfirmConfig] immediately and restored on
+ * Cancel. The item list is edited as a draft in [ItemPickerScreen] and only
+ * written to the config on Save.
  */
 class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_confirm.title", parent) {
   private val config = DropConfirmConfig
@@ -24,6 +25,8 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
   private val originalTreatAsWhitelist = config.treatAsWhitelist
   private val originalResetDelay = config.confirmationResetDelay
   private val originalConfirmationMode = config.confirmationMode
+
+  private var pendingItems = config.blacklistedItems.toList()
 
   private lateinit var listButton: Button
 
@@ -72,7 +75,9 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
     )
 
     listButton = add(VanillaWidgets.button(rightX, startY + 2 * rowStep, CONTROL_WIDTH, CONTROL_HEIGHT, t(listKey)) {
-      ClientGuiUtils.setScreen(minecraft, DropConfirmListEditorScreen(this))
+      val picker = ItemPickerScreen(this, pendingItems) { pendingItems = it }
+      // Finish dispatching the click before swapping screens.
+      minecraft?./*$ schedule_task {*/schedule/*$}*/ { ClientGuiUtils.setScreen(minecraft, picker) }
     }.withTooltip(t("$listKey.description")))
 
     // Bottom row
@@ -84,6 +89,7 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
     })
 
     add(VanillaWidgets.button(groupX + CONTROL_WIDTH + COLUMN_SPACING, bottomY, CONTROL_WIDTH, CONTROL_HEIGHT, t("option.drop_confirm.save_and_close")) {
+      config.blacklistedItems = pendingItems.toMutableList()
       config.save()
       ClientGuiUtils.setScreen(minecraft, parent)
     })

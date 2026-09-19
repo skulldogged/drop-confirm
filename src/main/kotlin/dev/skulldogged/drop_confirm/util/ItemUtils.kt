@@ -1,8 +1,6 @@
 package dev.skulldogged.drop_confirm.util
 
-//? if forge {
-/*import net.minecraftforge.registries.ForgeRegistries
-*///?} elif <=1.18.2 {
+//? if <=1.18.2 {
 /*import net.minecraft.core.Registry as BuiltInRegistries
 *///?} else {
 import net.minecraft.core.registries.BuiltInRegistries
@@ -32,11 +30,7 @@ object ItemUtils {
   /** Looks up a registered item, treating air as "not found". */
   @JvmStatic
   fun lookup(id: ResId): Item? {
-    //? if forge {
-    /*val item: Item? = ForgeRegistries.ITEMS.getValue(id)
-    *///?} else {
     val item: Item? = BuiltInRegistries.ITEM.getOptional(id).orElse(null)
-    //?}
 
     return if (item == null || item === Items.AIR) null else item
   }
@@ -46,7 +40,7 @@ object ItemUtils {
 
   @JvmStatic
   fun idOf(item: Item): String =
-    /*? if forge {*//*ForgeRegistries.ITEMS.getKey(item)*//*?} else {*/BuiltInRegistries.ITEM.getKey(item)/*?}*/.toString()
+    BuiltInRegistries.ITEM.getKey(item).toString()
 
   /**
    * A stack of [item] for display, or null when stacks cannot be built yet.

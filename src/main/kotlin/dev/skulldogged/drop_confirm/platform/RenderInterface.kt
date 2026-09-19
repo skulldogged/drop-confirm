@@ -14,6 +14,7 @@ import dev.skulldogged.drop_confirm.platform.impl.PoseStackRenderImpl
 import net.minecraft.util.FormattedCharSequence
 
 import net.minecraft.client.gui.Font
+import net.minecraft.world.item.ItemStack
 
 /**
  * Platform-independent rendering interface
@@ -27,6 +28,9 @@ interface RenderInterface {
 
   fun fill(x1: Int, y1: Int, x2: Int, y2: Int, color: Int): RenderInterface
   fun fillGradient(x1: Int, y1: Int, x2: Int, y2: Int, colorStart: Int, colorEnd: Int): RenderInterface
+
+  /** Draws a 16x16 item icon with its top-left corner at the given position. */
+  fun drawItem(stack: ItemStack, x: Int, y: Int): RenderInterface
 
   companion object {
     // @formatter:off

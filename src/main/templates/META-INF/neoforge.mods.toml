@@ -23,9 +23,3 @@ modId = "minecraft"
 type = "required"
 versionRange = "${minecraft_range}"
 side = "CLIENT"
-
-[[dependencies.${mod_id}]]
-modId = "${config_lib}"
-versionRange = "[${config_lib_version},)"
-type = "required"
-side = "CLIENT"

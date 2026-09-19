@@ -1,8 +1,11 @@
 //? if <=1.15.2 {
 /*package dev.skulldogged.drop_confirm.platform.impl
 
+import com.mojang.blaze3d.platform.Lighting
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.item.ItemStack
 import dev.skulldogged.drop_confirm.platform.RenderInterface
 import dev.skulldogged.drop_confirm.util.ComponentUtils
 
@@ -46,6 +49,14 @@ class LegacyRenderImpl : RenderInterface {
 
   override fun fillGradient(x1: Int, y1: Int, x2: Int, y2: Int, colorStart: Int, colorEnd: Int): RenderInterface {
     ScreenBridge.exposedFillGradient(x1, y1, x2, y2, colorStart, colorEnd)
+
+    return this
+  }
+
+  override fun drawItem(stack: ItemStack, x: Int, y: Int): RenderInterface {
+    Lighting./^? if 1.14.4 {^/turnOnGui/^?} else {^//^turnBackOn^//^?}^/()
+    Minecraft.getInstance().itemRenderer.renderAndDecorateItem(stack, x, y)
+    Lighting.turnOff()
 
     return this
   }

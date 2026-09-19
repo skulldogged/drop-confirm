@@ -28,5 +28,10 @@
   "option.drop_confirm.confirmation_mode.description": "Choose how/where item drop confirmations are displayed.",
   "option.drop_confirm.confirmation_mode.popup": "Popup",
   "option.drop_confirm.confirmation_mode.actionbar": "Action Bar",
-  "option.drop_confirm.confirmation_mode.chat": "Chat"
+  "option.drop_confirm.confirmation_mode.chat": "Chat",
+  "option.drop_confirm.list_empty": "No items yet. Add one below.",
+  "option.drop_confirm.invalid_item": "No item with that ID exists.",
+  "option.drop_confirm.already_listed": "That item is already in the list.",
+  "option.drop_confirm.item_added": "Added %s.",
+  "option.drop_confirm.remove": "Remove"
 }

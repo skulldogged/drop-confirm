@@ -1,8 +1,10 @@
 package dev.skulldogged.drop_confirm
 
-//? if <1.20.1 || forge {
-/*import io.github.cdagaming.unicore.utils.TranslationUtils
-import org.apache.logging.log4j.LogManager
+//? if >=1.18.2 {
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+//?} else {
+/*import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 *///?}
 
@@ -19,14 +21,9 @@ import dev.skulldogged.drop_confirm.util.ClientGuiUtils
 import dev.skulldogged.drop_confirm.util.ComponentUtils
 
 object DropConfirm {
-  //? if <1.20.1 || forge {
-  /*@JvmStatic val TRANSLATOR: TranslationUtils =
-    TranslationUtils("drop_confirm", true)
-      .setDefaultLanguage("en_us")
-      .build()
-
-  @JvmStatic val LOGGER: Logger = LogManager.getLogger("DropConfirm")
-  *///?}
+  @JvmStatic
+  val LOGGER: Logger =
+    /*? if >=1.18.2 {*/LoggerFactory.getLogger("DropConfirm")/*?} else {*//*LogManager.getLogger("DropConfirm")*//*?}*/
 
   @JvmStatic var isConfirmed = false
 

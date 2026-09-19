@@ -22,6 +22,9 @@ fun getDepOrNull(name: String): String? =
 
 val minecraft = getDep("minecraft")
 
+/** Fabric Language Kotlin release used for dev runs when a version does not pin one. */
+val defaultFabricKotlin = "1.13.10+kotlin.2.3.20"
+
 val java = when {
   sc.current.parsed >= "26.1" -> 25 to JVM_25
   sc.current.parsed >= "1.20.5" -> 21 to JVM_21
@@ -45,7 +48,7 @@ modstitch {
   metadata {
     modId = "drop_confirm"
     modName = "DropConfirm"
-    modVersion = "6.1.1"
+    modVersion = "6.2.0"
     modGroup = "dev.skulldogged.drop_confirm"
     modAuthor = "skulldogged"
     modDescription = "Think twice before you drop. Adds a confirmation prompt when dropping items."
@@ -76,10 +79,6 @@ modstitch {
     replacementProperties.put("fabric_kotlin_range",
       getDepOrNull("fabric-language-kotlin")?.let { ">=$it" } ?: "*"
     )
-
-    replacementProperties.put("config_lib", getDep("configLibName"))
-
-    replacementProperties.put("config_lib_version", getDep("configLibVersion"))
 
     replacementProperties.put("mod_sources", "https://github.com/skulldogged/drop-confirm")
     replacementProperties.put("mod_issue_tracker", "https://github.com/skulldogged/drop-confirm/issues")
@@ -193,16 +192,13 @@ sc {
     current.parsed >= "26.1" -> "extractRenderState"
     else -> "render"
   }
+  swaps["add_widget_fn"] = when {
+    current.parsed >= "1.17.1" -> "addRenderableWidget"
+    else -> "addButton"
+  }
 }
 
 dependencies {
-  modstitchModImplementation(getDep("configLib"))
-
-  if (sc.current.parsed < "1.20.1" || loader == "forge") {
-    modstitchImplementation(libs.json)
-    modstitchJiJ(libs.json)
-  }
-
   modstitch {
     loom {
       listOf(
@@ -239,6 +235,24 @@ dependencies {
   }
 }
 
+// Fabric Language Kotlin is a runtime dependency of the mod. Versions that do not pin a release
+// still need it on the dev runtime classpath, otherwise Fabric Loader refuses to start the client.
+// Mod Menu (dev only) additionally needs the Fabric screen API module on newer versions.
+if (loader == "fabric") {
+  configurations.matching { it.name == "modLocalRuntime" }.configureEach {
+    if (getDepOrNull("fabric-language-kotlin") == null)
+      dependencies.add(project.dependencies.create("net.fabricmc:fabric-language-kotlin:$defaultFabricKotlin"))
+
+    if (sc.current.parsed >= "1.16.5")
+      dependencies.add(
+        project.dependencies.create(
+          (project.extensions.findByName("fabricApi") as FabricApiExtension)
+            .module("fabric-screen-api-v1", getDep("fabric-api"))
+        )
+      )
+  }
+}
+
 publishMods {
   val envFilePath = rootDir.resolve(".env")
 
@@ -270,12 +284,12 @@ publishMods {
   displayName = releaseDisplayName
 
   changelog = """
-    This update adds Minecraft 26.2 support.
+    DropConfirm no longer depends on a config library. The settings screen is now built into the mod,
+    so YetAnotherConfigLib and UniLib are no longer required on any version.
 
     ## Dependencies
 
     ### Required
-      * ${getDep("changelogConfigLib")}
       * ${getDep("changelogKotlin")}
 
       ${
@@ -300,13 +314,6 @@ publishMods {
     projectId.set("881314")
     minecraftVersions.addAll(supportedVersionsList)
 
-    requires(
-      when {
-        sc.current.parsed >= "1.20.1" && loader != "forge" -> "yacl"
-        else -> "unilib"
-      }
-    )
-
     if (loader == "fabric") {
       requires("fabric-api")
       requires("fabric-language-kotlin")
@@ -321,12 +328,6 @@ publishMods {
     projectId.set("I45rjF2F")
     minecraftVersions.addAll(supportedVersionsList)
 
-    requires(
-      when {
-        sc.current.parsed >= "1.20.1" && loader != "forge" -> "yacl"
-        else -> "unilib"
-      }
-    )
     if (loader == "fabric") {
       requires("fabric-api")
       requires("fabric-language-kotlin")

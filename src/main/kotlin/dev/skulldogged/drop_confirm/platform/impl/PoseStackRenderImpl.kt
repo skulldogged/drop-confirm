@@ -2,10 +2,11 @@
 /*package dev.skulldogged.drop_confirm.platform.impl
 
 import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.network.chat.Component
 import net.minecraft.util.FormattedCharSequence
+import net.minecraft.world.item.ItemStack
 import dev.skulldogged.drop_confirm.platform.RenderInterface
 import dev.skulldogged.drop_confirm.util.ComponentUtils
 
@@ -56,6 +57,12 @@ class PoseStackRenderImpl(private val poseStack: PoseStack) : RenderInterface {
 
   override fun fillGradient(x1: Int, y1: Int, x2: Int, y2: Int, colorStart: Int, colorEnd: Int): RenderInterface {
     ScreenBridge.exposedFillGradient(poseStack, x1, y1, x2, y2, colorStart, colorEnd)
+
+    return this
+  }
+
+  override fun drawItem(stack: ItemStack, x: Int, y: Int): RenderInterface {
+    Minecraft.getInstance().itemRenderer.renderAndDecorateItem(/^? if >=1.19.4 {^/poseStack, /^?}^/stack, x, y)
 
     return this
   }

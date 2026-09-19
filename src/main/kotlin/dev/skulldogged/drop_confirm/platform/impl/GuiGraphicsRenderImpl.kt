@@ -4,6 +4,7 @@ package dev.skulldogged.drop_confirm.platform.impl
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui./*$ gui_graphics_type {*/GuiGraphics/*$}*/
 import net.minecraft.util.FormattedCharSequence
+import net.minecraft.world.item.ItemStack
 import dev.skulldogged.drop_confirm.platform.RenderInterface
 
 class GuiGraphicsRenderImpl(private val graphics: /*$ gui_graphics_type {*/GuiGraphics/*$}*/) : RenderInterface {
@@ -39,6 +40,12 @@ class GuiGraphicsRenderImpl(private val graphics: /*$ gui_graphics_type {*/GuiGr
 
   override fun fillGradient(x1: Int, y1: Int, x2: Int, y2: Int, colorStart: Int, colorEnd: Int): RenderInterface {
     graphics.fillGradient(x1, y1, x2, y2, colorStart, colorEnd)
+
+    return this
+  }
+
+  override fun drawItem(stack: ItemStack, x: Int, y: Int): RenderInterface {
+    graphics./*? if >=26.1 {*//*item*//*?} else {*/renderItem/*?}*/(stack, x, y)
 
     return this
   }

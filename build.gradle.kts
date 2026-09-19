@@ -217,7 +217,11 @@ dependencies {
     }
 
     moddevgradle {
-      getDepOrNull("kotlinForForge")?.let { modstitchImplementation(it) }
+      // NeoForge has no Kotlin runtime of its own, so nest the standard library in the jar.
+      // NeoForge deduplicates nested jars by identifier, so this coexists with Kotlin for Forge.
+      val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}"
+      modstitchImplementation(kotlinStdlib)
+      modstitchJiJ(kotlinStdlib)
     }
   }
 }
@@ -273,11 +277,16 @@ publishMods {
   changelog = """
     DropConfirm no longer depends on a config library. The settings screen is now built into the mod,
     so YetAnotherConfigLib and UniLib are no longer required on any version.
+    The item list is now edited with a searchable picker instead of typing item IDs.
+    On NeoForge, Kotlin for Forge is no longer required either.
 
     ## Dependencies
-
+      ${
+    if (loader == "fabric") """
     ### Required
       * ${getDep("changelogKotlin")}
+    """ else "None."
+  }
 
       ${
     if (loader == "fabric") """
@@ -305,8 +314,6 @@ publishMods {
       requires("fabric-api")
       requires("fabric-language-kotlin")
       optional("modmenu")
-    } else {
-      requires("kotlin-for-forge")
     }
   }
 
@@ -319,8 +326,6 @@ publishMods {
       requires("fabric-api")
       requires("fabric-language-kotlin")
       optional("modmenu")
-    } else {
-      requires("kotlin-for-forge")
     }
   }
 }

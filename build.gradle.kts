@@ -310,6 +310,8 @@ publishMods {
     accessToken.set(envVars["CURSEFORGE_TOKEN"])
     projectId.set("881314")
     minecraftVersions.addAll(supportedVersionsList)
+    clientRequired.set(true)
+    serverRequired.set(false)
 
     if (loader == "fabric") {
       requires("fabric-api")

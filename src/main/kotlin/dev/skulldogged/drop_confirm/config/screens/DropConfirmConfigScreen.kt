@@ -27,6 +27,7 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
   private val originalConfirmationMode = config.confirmationMode
 
   private var pendingItems = config.blacklistedItems.toList()
+  private var pendingExact = config.exactItems.toList()
 
   private lateinit var listButton: Button
 
@@ -75,7 +76,10 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
     )
 
     listButton = add(VanillaWidgets.button(rightX, startY + 2 * rowStep, CONTROL_WIDTH, CONTROL_HEIGHT, t(listKey)) {
-      val picker = ItemPickerScreen(this, pendingItems) { pendingItems = it }
+      val picker = ItemPickerScreen(this, pendingItems, pendingExact) { items, exact ->
+        pendingItems = items
+        pendingExact = exact
+      }
       // Finish dispatching the click before swapping screens.
       minecraft?./*$ schedule_task {*/schedule/*$}*/ { ClientGuiUtils.setScreen(minecraft, picker) }
     }.withTooltip(t("$listKey.description")))
@@ -90,6 +94,7 @@ class DropConfirmConfigScreen(parent: Screen?) : ConfigScreenBase("config.drop_c
 
     add(VanillaWidgets.button(groupX + CONTROL_WIDTH + COLUMN_SPACING, bottomY, CONTROL_WIDTH, CONTROL_HEIGHT, t("option.drop_confirm.save_and_close")) {
       config.blacklistedItems = pendingItems.toMutableList()
+      config.exactItems = pendingExact.toMutableList()
       config.save()
       ClientGuiUtils.setScreen(minecraft, parent)
     })

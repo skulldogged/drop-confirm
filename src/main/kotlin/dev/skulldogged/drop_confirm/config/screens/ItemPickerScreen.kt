@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import dev.skulldogged.drop_confirm.config.ExactItem
 import dev.skulldogged.drop_confirm.config.widgets.TextInput
 import dev.skulldogged.drop_confirm.config.widgets.VanillaWidgets
 import dev.skulldogged.drop_confirm.platform.RenderInterface
@@ -34,15 +35,26 @@ import dev.skulldogged.drop_confirm.util.ItemUtils
 
 /**
  * A searchable two-column item picker: every registered item on the left, the
- * chosen items on the right. Edits a local draft; [apply] receives the result
- * when Done is pressed and the parent screen remains responsible for saving.
+ * chosen items on the right. Exact stacks added with the keybind are shown in the
+ * right column too, so they can be removed here.
+ *
+ * Edits a local draft; [apply] receives the result when Done is pressed and the
+ * parent screen remains responsible for saving.
  */
 class ItemPickerScreen(
   parent: Screen,
-  initial: List<Item>,
-  private val apply: (List<Item>) -> Unit
+  initialItems: List<Item>,
+  initialExact: List<ExactItem>,
+  private val apply: (List<Item>, List<ExactItem>) -> Unit
 ) : ConfigScreenBase("item_picker.drop_confirm.title", parent) {
-  private val selected = initial.filter { it !== Items.AIR }.toMutableSet()
+  /** One row in either column. */
+  private sealed class Entry {
+    class Type(val item: Item) : Entry()
+    class Exact(val entry: ExactItem) : Entry()
+  }
+
+  private val selected = initialItems.filter { it !== Items.AIR }.toMutableSet()
+  private val selectedExact = initialExact.toMutableList()
 
   private val catalog: List<Item> = BuiltInRegistries.ITEM.filter { it !== Items.AIR }
     .sortedWith(compareBy<Item> { nameOf(it).lowercase(Locale.ROOT) }.thenBy { ItemUtils.idOf(it) })
@@ -51,7 +63,7 @@ class ItemPickerScreen(
   private var availableOffset = 0
   private var selectedOffset = 0
   private var available = emptyList<Item>()
-  private var chosen = emptyList<Item>()
+  private var chosen = emptyList<Entry>()
   private val rows = mutableListOf<Button>()
 
   private lateinit var search: TextInput
@@ -96,7 +108,7 @@ class ItemPickerScreen(
 
     add(VanillaWidgets.button(groupX, buttonY, CONTROL_WIDTH, CONTROL_HEIGHT, t("gui.cancel")) { onClose() })
     add(VanillaWidgets.button(groupX + CONTROL_WIDTH + BUTTON_SPACING, buttonY, CONTROL_WIDTH, CONTROL_HEIGHT, t("gui.done")) {
-      apply(selected.toList())
+      apply(selected.toList(), selectedExact.toList())
       onClose()
     })
 
@@ -125,7 +137,8 @@ class ItemPickerScreen(
         nameOf(it).lowercase(Locale.ROOT).contains(filter) ||
         ItemUtils.idOf(it).contains(filter))
     }
-    chosen = catalog.filter { it in selected }
+    chosen = catalog.filter { it in selected }.map<Item, Entry> { Entry.Type(it) } +
+      selectedExact.map { Entry.Exact(it) }
 
     availableOffset = availableOffset.coerceIn(0, maxOf(0, available.size - visibleRows))
     selectedOffset = selectedOffset.coerceIn(0, maxOf(0, chosen.size - visibleRows))
@@ -135,13 +148,13 @@ class ItemPickerScreen(
     rows.forEach { remove(it) }
     rows.clear()
 
-    fun addRows(items: List<Item>, offset: Int, x: Int, removing: Boolean) {
-      items.drop(offset).take(visibleRows).forEachIndexed { index, item ->
-        rows.add(add(ItemRow(item, removing, x, LIST_TOP + index * ROW_HEIGHT)))
+    fun addRows(entries: List<Entry>, offset: Int, x: Int, removing: Boolean) {
+      entries.drop(offset).take(visibleRows).forEachIndexed { index, entry ->
+        rows.add(add(PickerRow(entry, removing, x, LIST_TOP + index * ROW_HEIGHT)))
       }
     }
 
-    addRows(available, availableOffset, left, false)
+    addRows(available.map { Entry.Type(it) }, availableOffset, left, false)
     addRows(chosen, selectedOffset, right, true)
 
     if (focusedRow >= 0) focused = rows.getOrNull(focusedRow.coerceAtMost(rows.lastIndex)) ?: search
@@ -152,8 +165,11 @@ class ItemPickerScreen(
     selectedDown.active = selectedOffset + visibleRows < chosen.size
   }
 
-  private fun toggle(item: Item) {
-    if (!selected.remove(item)) selected.add(item)
+  private fun toggle(entry: Entry) {
+    when (entry) {
+      is Entry.Type -> if (!selected.remove(entry.item)) selected.add(entry.item)
+      is Entry.Exact -> selectedExact.remove(entry.entry)
+    }
 
     // Replacing rows during a click can dispatch that click to the new row, so defer.
     minecraft?./*$ schedule_task {*/schedule/*$}*/ { refresh() }
@@ -170,7 +186,7 @@ class ItemPickerScreen(
 
   override fun drawExtra(render: RenderInterface, mouseX: Int, mouseY: Int) {
     render.drawString(font, text("available", available.size), left, HEADER_Y, Color.TEXT())
-    render.drawString(font, text("selected", selected.size), right, HEADER_Y, Color.TEXT())
+    render.drawString(font, text("selected", chosen.size), right, HEADER_Y, Color.TEXT())
 
     if (available.isEmpty())
       render.drawCenteredString(font, text("no_matches"), left + columnWidth / 2, LIST_TOP + 12, Color.DISABLED())
@@ -205,29 +221,26 @@ class ItemPickerScreen(
     return true
   }
 
-  /** One row: item icon, name and ID, with a plus or minus marker. Pressing it moves the item. */
-  private inner class ItemRow(private val item: Item, private val removing: Boolean, x: Int, y: Int) :
+  /** One row: item icon, name and ID, with a plus or minus marker. Pressing it moves the entry. */
+  private inner class PickerRow(private val entry: Entry, private val removing: Boolean, x: Int, y: Int) :
     Button(
       x, y, columnWidth, ROW_HEIGHT - 2,
-      ComponentUtils.translatable("item_picker.drop_confirm.${if (removing) "remove_item" else "add_item"}", nameOf(item))
+      ComponentUtils.translatable("item_picker.drop_confirm.${if (removing) "remove_item" else "add_item"}", labelOf(entry))
         /*? if <=1.15.2 {*//*.string*//*?}*/,
-      { toggle(item) }
+      { toggle(entry) }
       /*? if >=1.19.4 {*/, DEFAULT_NARRATION/*?}*/
     ) {
-    // Before a world is loaded, 26.1+ has item models but no bound default components,
-    // so build a preview stack with local components instead of touching the registry.
-    private val preview: ItemStack =
-      //? if >=26.1 {
-      /*if (!item.builtInRegistryHolder().areComponentsBound()) {
-        val components = DataComponentMap.builder()
-          .addAll(DataComponents.COMMON_ITEM_COMPONENTS)
-          .set(DataComponents.ITEM_NAME, ComponentUtils.translatable(item.descriptionId))
-          .set(DataComponents.ITEM_MODEL, BuiltInRegistries.ITEM.getKey(item))
-          .build()
-        ItemStack(Holder.direct(item, components))
-      } else
-      *///?}
-      ItemStack(item)
+    private val name: String = labelOf(entry)
+
+    private val detail: String = when (entry) {
+      is Entry.Type -> ItemUtils.idOf(entry.item)
+      is Entry.Exact -> text("exact", entry.entry.id)
+    }
+
+    private val preview: ItemStack? = when (entry) {
+      is Entry.Type -> previewOf(entry.item)
+      is Entry.Exact -> ItemUtils.lookup(entry.entry.id)?.let { previewOf(it) }
+    }
 
     override fun /*$ render_method {*/renderWidget/*$}*/(
       /*? if >=1.16.5 {*/context: PoseStack,/*?}*/
@@ -242,10 +255,10 @@ class ItemPickerScreen(
       if (hover) render.fill(x, y, x + 2, y + height, Color.TEXT())
 
       val maxWidth = width - 48
-      render.drawString(font, trimLabel(nameOf(item), maxWidth), x + 26, y + 3, Color.TEXT())
-      render.drawString(font, trimLabel(ItemUtils.idOf(item), maxWidth), x + 26, y + 13, Color.DISABLED())
+      render.drawString(font, trimLabel(name, maxWidth), x + 26, y + 3, Color.TEXT())
+      render.drawString(font, trimLabel(detail, maxWidth), x + 26, y + 13, Color.DISABLED())
       render.drawCenteredString(font, if (removing) "-" else "+", x + width - 11, y + 8, Color.TEXT())
-      render.drawItem(preview, x + 5, y + 4)
+      preview?.let { render.drawItem(it, x + 5, y + 4) }
     }
   }
 
@@ -264,5 +277,27 @@ class ItemPickerScreen(
 
     /** The item's translated name, which works before a world is loaded on every version. */
     private fun nameOf(item: Item): String = ComponentUtils.translatable(item.descriptionId).string
+
+    private fun labelOf(entry: Entry): String = when (entry) {
+      is Entry.Type -> nameOf(entry.item)
+      is Entry.Exact -> entry.entry.name
+    }
+
+    /**
+     * A stack for drawing the icon. Before a world is loaded, 26.1+ has item models but no
+     * bound default components, so build one with local components instead of touching the registry.
+     */
+    private fun previewOf(item: Item): ItemStack =
+      //? if >=26.1 {
+      /*if (!item.builtInRegistryHolder().areComponentsBound()) {
+        val components = DataComponentMap.builder()
+          .addAll(DataComponents.COMMON_ITEM_COMPONENTS)
+          .set(DataComponents.ITEM_NAME, ComponentUtils.translatable(item.descriptionId))
+          .set(DataComponents.ITEM_MODEL, BuiltInRegistries.ITEM.getKey(item))
+          .build()
+        ItemStack(Holder.direct(item, components))
+      } else
+      *///?}
+      ItemStack(item)
   }
 }

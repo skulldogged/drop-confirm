@@ -36,5 +36,10 @@
   "item_picker.drop_confirm.no_matches": "No matching items",
   "item_picker.drop_confirm.empty": "No items selected",
   "item_picker.drop_confirm.previous": "Previous items",
-  "item_picker.drop_confirm.next": "Next items"
+  "item_picker.drop_confirm.next": "Next items",
+  "key.drop_confirm.toggle_held": "Add/Remove Held Item",
+  "drop_confirm.exact.added": "Added %s to the item list",
+  "drop_confirm.exact.removed": "Removed %s from the item list",
+  "drop_confirm.exact.empty_hand": "Hold an item to add it to the list",
+  "item_picker.drop_confirm.exact": "%s (exact item)"
 }

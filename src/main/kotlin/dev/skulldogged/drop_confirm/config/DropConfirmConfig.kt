@@ -16,8 +16,10 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
 import dev.skulldogged.drop_confirm.DropConfirm
 import dev.skulldogged.drop_confirm.util.ItemUtils
+import dev.skulldogged.drop_confirm.util.StackUtils
 
 enum class ConfirmationMode {
   POPUP, ACTIONBAR, CHAT;
@@ -57,6 +59,21 @@ object DropConfirmConfig {
   @JvmStatic
   @get:JvmName("getBlacklistedItems")
   var blacklistedItems: MutableList<Item> = mutableListOf()
+
+  /** Specific stacks added with the keybind, matched by their full data rather than type. */
+  @JvmStatic
+  @get:JvmName("getExactItems")
+  var exactItems: MutableList<ExactItem> = mutableListOf()
+
+  /** True if [stack] is on the list, either by item type or as an exact entry. */
+  @JvmStatic
+  fun isListed(stack: ItemStack): Boolean {
+    if (stack.item in blacklistedItems) return true
+    if (exactItems.isEmpty()) return false
+
+    val encoded = StackUtils.encode(stack) ?: return false
+    return exactItems.any { it.matches(encoded) }
+  }
 
   private val gson = Gson()
 
@@ -114,6 +131,38 @@ object DropConfirmConfig {
             blacklistedItems = items
           }
 
+          "exactItems" -> {
+            val items = mutableListOf<ExactItem>()
+            reader.beginArray()
+            while (reader.hasNext()) {
+              if (reader.peek() != JsonToken.BEGIN_OBJECT) {
+                reader.skipValue()
+                continue
+              }
+
+              var id = ""
+              var name = ""
+              var data = ""
+              reader.beginObject()
+              while (reader.hasNext()) {
+                when (reader.nextName()) {
+                  "item" -> id = reader.nextString()
+                  "name" -> name = reader.nextString()
+                  "data" -> data = reader.nextString()
+                  else -> reader.skipValue()
+                }
+              }
+              reader.endObject()
+
+              if (id.isNotEmpty() && data.isNotEmpty()) {
+                val entry = ExactItem(id, name.ifEmpty { id }, data)
+                if (entry !in items) items.add(entry)
+              }
+            }
+            reader.endArray()
+            exactItems = items
+          }
+
           else -> reader.skipValue()
         }
       }
@@ -146,11 +195,23 @@ object DropConfirmConfig {
         appendLine()
         appendLine("  // Items to blacklist (or whitelist, if treatAsWhitelist is true)")
         if (ids.isEmpty()) {
-          appendLine("  \"blacklistedItems\": []")
+          appendLine("  \"blacklistedItems\": [],")
         } else {
           appendLine("  \"blacklistedItems\": [")
           ids.forEachIndexed { index, id ->
             appendLine("    ${gson.toJson(id)}${if (index < ids.lastIndex) "," else ""}")
+          }
+          appendLine("  ],")
+        }
+        appendLine()
+        appendLine("  // Specific items added with the keybind, matched by their exact data")
+        if (exactItems.isEmpty()) {
+          appendLine("  \"exactItems\": []")
+        } else {
+          appendLine("  \"exactItems\": [")
+          exactItems.forEachIndexed { index, entry ->
+            append("    { \"item\": ${gson.toJson(entry.id)}, \"name\": ${gson.toJson(entry.name)}, \"data\": ${gson.toJson(entry.data)} }")
+            appendLine(if (index < exactItems.lastIndex) "," else "")
           }
           appendLine("  ]")
         }

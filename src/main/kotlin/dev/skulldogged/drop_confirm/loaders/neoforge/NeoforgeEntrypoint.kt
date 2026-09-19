@@ -12,6 +12,7 @@ import net.neoforged.fml.loading.FMLEnvironment
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent
 import net.neoforged.neoforge.client.event.InputEvent
 import net.neoforged.neoforge.common.NeoForge
+import dev.skulldogged.drop_confirm.DropConfirm.TOGGLE_HELD_KEY
 import dev.skulldogged.drop_confirm.DropConfirm.TOGGLE_KEY
 import dev.skulldogged.drop_confirm.DropConfirm.handleKeyPresses
 import dev.skulldogged.drop_confirm.config.DropConfirmConfig
@@ -27,7 +28,10 @@ class NeoforgeEntrypoint {
   companion object {
     @SubscribeEvent
     @JvmStatic
-    fun registerKeyMappings(event: RegisterKeyMappingsEvent) = event.register(TOGGLE_KEY)
+    fun registerKeyMappings(event: RegisterKeyMappingsEvent) {
+      event.register(TOGGLE_KEY)
+      event.register(TOGGLE_HELD_KEY)
+    }
   }
 
   init {

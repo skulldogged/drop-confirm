@@ -177,7 +177,8 @@ class PopupScreen(val itemStack: ItemStack, private val entireStack: Boolean) : 
 
       val itemName =
         ComponentUtils
-          .literal(itemStack.item.getName(itemStack).string)
+          .literal("")
+          .append(itemStack.hoverName)
           .withStyle(/*$ item_style {*/itemStack.rarity.color()/*$}*/)
 
       //? if <=1.15.2 {

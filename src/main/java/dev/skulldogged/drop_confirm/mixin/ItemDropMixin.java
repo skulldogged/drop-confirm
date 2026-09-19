@@ -55,7 +55,7 @@ public class ItemDropMixin {
       ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS
       : ServerboundPlayerActionPacket.Action.DROP_ITEM;
 
-    if (DropConfirmConfig.getBlacklistedItems().contains(itemStack.getItem()) ^ DropConfirmConfig.shouldTreatAsWhitelist())
+    if (DropConfirmConfig.isListed(itemStack) ^ DropConfirmConfig.shouldTreatAsWhitelist())
       return;
 
     if (drop_confirm$expiresAt != 0 && System.nanoTime() >= drop_confirm$expiresAt)
